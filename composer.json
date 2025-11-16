@@ -1,0 +1,11 @@
+{
+  "name": "accesswatch/bits-accessible-forms",
+  "description": "WCAG 2.2 AA accessible form builder for WordPress.",
+  "type": "wordpress-plugin",
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "BITS\\\\AccessibleForms\\\\": "inc/"
+    }
+  }
+}
