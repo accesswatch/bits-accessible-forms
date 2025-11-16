@@ -33,17 +33,34 @@ jobs:
           tools: composer:v2
           coverage: none
       - name: Cache Composer dependencies
+        id: composer-cache
         uses: actions/cache@v4
         with:
           path: vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+      - name: Log cache status
+        run: |
+          if [ "${{ steps.composer-cache.outputs.cache-hit }}" == "true" ]; then
+            echo "✓ Cache restored successfully"
+          else
+            echo "✗ Cache miss - dependencies will be downloaded"
+          fi
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
           COMPOSER_NO_AUDIT: 1
+      - name: Verify PHPUnit installation
+        run: |
+          if [ -f vendor/bin/phpunit ]; then
+            echo "✓ PHPUnit binary exists at vendor/bin/phpunit"
+            vendor/bin/phpunit --version
+          else
+            echo "✗ ERROR: PHPUnit binary not found at vendor/bin/phpunit"
+            exit 1
+          fi
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
