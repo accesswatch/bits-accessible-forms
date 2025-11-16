@@ -1,0 +1,18 @@
+Remove any of the following keys/lines from a workspace `.vscode/settings.json` (they override user settings):
+
+"security.workspace.trust.enabled": true,
+"security.workspace.trust.untrustedFiles": "newWindow",
+"security.workspace.trust.untrustedFiles": "prompt",
+"security.workspace.trust.startupPrompt": "default",
+
+Also remove any extension-specific keys that mention `workspace.trust` or explicitly enable trust-related behaviors. In general, remove any `security.workspace.trust.*` entries in the workspace settings file.
+
+Example: open `.vscode/settings.json` and delete these entries (or set them to the desired value):
+
+{
+  // ...other settings...
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.untrustedFiles": "prompt"
+}
+
+After removal, save the workspace settings and restart VS Code.

@@ -1,0 +1,39 @@
+{
+  "title": "Registration with Payment",
+  "settings": {
+    "currency": "USD",
+    "tax": {
+      "mode": "manual",
+      "priceMode": "exclusive",
+      "addressSource": "billing",
+      "rules": [
+        { "region": { "country": "US", "state": "CA" }, "rate": 0.0925, "targets": ["products","options"], "shippingTaxable": false }
+      ]
+    }
+  },
+  "pages": [
+    {
+      "id": "p1",
+      "title": "Your Info",
+      "sections": [
+        { "id": "s1", "label": "Contact", "headingLevel": 2, "fields": [
+          { "id": 1, "type": "name", "label": "Name", "isRequired": true, "inputs": [ { "id": "1.3", "label": "First" }, { "id": "1.6", "label": "Last" } ] },
+          { "id": 2, "type": "email", "label": "Email", "isRequired": true }
+        ]}
+      ],
+      "navigation": { "next": { "text": "Next" } }
+    },
+    {
+      "id": "p2",
+      "title": "Plan & Pay",
+      "sections": [
+        { "id": "s2", "label": "Plan", "headingLevel": 2, "fields": [
+          { "id": 3, "type": "singleproduct", "label": "Plan", "choices": [ { "text": "Basic", "value": "basic", "price": 100 }, { "text": "Pro", "value": "pro", "price": 200 } ] },
+          { "id": 4, "type": "quantity", "label": "Seats", "defaultValue": 1, "meta": { "validation": { "min": 1, "max": 100 } } },
+          { "id": 5, "type": "total", "label": "Total" }
+        ]}
+      ],
+      "navigation": { "prev": { "text": "Back" } }
+    }
+  ]
+}
