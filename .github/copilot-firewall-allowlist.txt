@@ -1,0 +1,17 @@
+# GitHub Copilot Firewall Allowlist
+# Additional domains allowed for Composer dependency installation
+# These domains are required to download PHP packages from GitHub repositories
+
+# GitHub API endpoints for package downloads
+api.github.com
+codeload.github.com
+github.com
+
+# Package repositories that use GitHub as their source
+# Required for PHPUnit and related testing dependencies
+# These patterns cover repos like:
+# - myclabs/DeepCopy
+# - nikic/PHP-Parser
+# - phar-io/manifest
+# - phar-io/version
+# - sebastianbergmann/* (phpunit and related packages)
