@@ -39,11 +39,27 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --prefer-dist --no-progress --no-interaction
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
           COMPOSER_NO_AUDIT: 1
+      - name: Verify vendor directory and PHPUnit installation
+        run: |
+          echo "Checking vendor directory..."
+          ls -la vendor/ || echo "vendor directory does not exist"
+          echo "Checking vendor/bin directory..."
+          ls -la vendor/bin/ || echo "vendor/bin directory does not exist"
+          echo "Checking PHPUnit binary..."
+          if [ -f vendor/bin/phpunit ]; then
+            echo "PHPUnit binary found"
+            vendor/bin/phpunit --version
+          else
+            echo "ERROR: PHPUnit binary not found at vendor/bin/phpunit"
+            exit 1
+          fi
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
