@@ -7,6 +7,11 @@ name: Copilot Actions Setup
 on:
   workflow_dispatch:
 
+env:
+  # Additional domains allowed through the Copilot firewall
+  # Required for Composer to download PHP packages from GitHub
+  COPILOT_AGENT_FIREWALL_ALLOW_LIST_ADDITIONS: api.github.com,codeload.github.com,github.com
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -24,12 +29,19 @@ jobs:
       - name: Validate composer.json
         run: composer validate --strict
 
+      - name: Configure Composer GitHub token
+        run: |
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
+          fi
+
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
           COMPOSER_NO_AUDIT: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4

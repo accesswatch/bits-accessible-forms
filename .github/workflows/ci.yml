@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # Additional domains allowed through the Copilot firewall
+  # Required for Composer to download PHP packages from GitHub
+  COPILOT_AGENT_FIREWALL_ALLOW_LIST_ADDITIONS: api.github.com,codeload.github.com,github.com
+
 jobs:
   php-lint:
     runs-on: ubuntu-latest
@@ -39,11 +44,17 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+      - name: Configure Composer GitHub token
+        run: |
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
+          fi
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
           COMPOSER_NO_AUDIT: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --testdox
