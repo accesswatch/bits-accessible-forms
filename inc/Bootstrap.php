@@ -12,6 +12,7 @@ class Bootstrap
         $this->register_caps();
         $this->register_assets();
         $this->register_rest();
+        $this->register_renderer();
     }
 
     public static function activate(): void
@@ -46,7 +47,19 @@ class Bootstrap
 
     private function register_rest(): void
     {
-        // Register REST routes in later sprint.
-        // add_action('rest_api_init', function () { ... });
+        add_action('rest_api_init', function () {
+            if (class_exists('BITS\\AccessibleForms\\REST\\FormsController')) {
+                $forms_controller = new \BITS\AccessibleForms\REST\FormsController();
+                $forms_controller->register_routes();
+            }
+        });
+    }
+
+    private function register_renderer(): void
+    {
+        if (class_exists('BITS\\AccessibleForms\\Renderer\\FormRenderer')) {
+            $renderer = new \BITS\AccessibleForms\Renderer\FormRenderer();
+            $renderer->init();
+        }
     }
 }

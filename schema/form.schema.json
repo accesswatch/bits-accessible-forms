@@ -1,0 +1,365 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://accesswatch.github.io/bits-accessible-forms/schema/form.schema.json",
+  "title": "BITS Accessible Form Schema",
+  "description": "JSON schema for validating BITS form structure",
+  "type": "object",
+  "required": ["title", "pages"],
+  "properties": {
+    "id": {
+      "type": ["integer", "null"],
+      "description": "Form ID (null for new forms)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "description": {
+      "type": "string"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "default": "USD"
+        },
+        "layout": {
+          "type": "object",
+          "properties": {
+            "columns": { "enum": ["one", "two"] },
+            "labelPlacement": { "enum": ["top", "left", "hidden"] },
+            "descriptionPlacement": { "enum": ["below", "above"] },
+            "validationSummary": { "type": "boolean" },
+            "requiredIndicator": { "enum": ["text", "asterisk"] },
+            "cssClass": { "type": "string" },
+            "markupVersion": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "spam": {
+          "type": "object",
+          "properties": {
+            "honeypot": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "action": { "enum": ["spam", "reject"] }
+              }
+            },
+            "speedCheck": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "thresholdMs": { "type": "integer", "minimum": 0 },
+                "mode": { "enum": ["normal", "strict"] }
+              }
+            }
+          }
+        },
+        "restrictions": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "count": { "type": "integer", "minimum": 0 },
+                "period": { "type": "string" }
+              }
+            },
+            "schedule": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "startISO": { "type": "string" },
+                "endISO": { "type": "string" },
+                "pendingMessage": { "type": "string" },
+                "expiredMessage": { "type": "string" }
+              }
+            },
+            "requireLogin": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        },
+        "saveContinue": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "buttonText": { "type": "string" }
+          }
+        },
+        "tax": {
+          "type": "object",
+          "properties": {
+            "mode": { "enum": ["manual", "auto"] },
+            "priceMode": { "enum": ["exclusive", "inclusive"] },
+            "addressSource": { "enum": ["billing", "shipping"] },
+            "nexus": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "country": { "type": "string" }
+                }
+              }
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["region", "rate"],
+                "properties": {
+                  "region": {
+                    "type": "object",
+                    "required": ["country"],
+                    "properties": {
+                      "country": { "type": "string" },
+                      "state": { "type": "string" },
+                      "zip": { "type": "string" }
+                    }
+                  },
+                  "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "targets": {
+                    "type": "array",
+                    "items": { "enum": ["products", "options", "shipping"] }
+                  },
+                  "shippingTaxable": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "coupons": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" }
+          }
+        },
+        "privacy": {
+          "type": "object",
+          "properties": {
+            "ipLogging": { "type": "boolean" },
+            "retention": {
+              "type": "object",
+              "properties": {
+                "ipDays": { "type": "integer", "minimum": 0 },
+                "spamDays": { "type": "integer", "minimum": 0 },
+                "traceDays": { "type": "integer", "minimum": 0 },
+                "paymentLogDays": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "logRedaction": { "type": "boolean" }
+          }
+        },
+        "a11y": {
+          "type": "object",
+          "properties": {
+            "focusVisible": { "type": "boolean" },
+            "targetMinSize": { "type": "integer", "minimum": 0 },
+            "errorSummary": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/Page"
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Notification"
+      }
+    },
+    "confirmations": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/Confirmation"
+      }
+    }
+  },
+  "definitions": {
+    "Page": {
+      "type": "object",
+      "required": ["id", "sections"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "progressLabel": { "type": "string" },
+        "navigation": {
+          "type": "object",
+          "properties": {
+            "next": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" }
+              }
+            },
+            "prev": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" }
+              }
+            }
+          }
+        },
+        "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Section" }
+        }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "required": ["id", "fields"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "displayOnly": { "type": "boolean" },
+        "headingLevel": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "description": { "type": "string" },
+        "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Field" }
+        }
+      }
+    },
+    "Field": {
+      "type": "object",
+      "required": ["id", "type", "label"],
+      "properties": {
+        "id": { "type": "integer" },
+        "type": {
+          "enum": [
+            "email", "text", "textarea", "select", "checkbox", "radio",
+            "name", "address", "date", "time", "website", "password",
+            "fileupload", "list", "multiselect", "html", "hidden",
+            "section", "page", "consent", "image_choice", "product",
+            "quantity", "options", "shipping", "total", "price_user"
+          ]
+        },
+        "label": { "type": "string" },
+        "isRequired": { "type": "boolean" },
+        "placeholder": { "type": "string" },
+        "helpText": { "type": "string" },
+        "size": { "enum": ["small", "medium", "large"] },
+        "cssClass": { "type": "string" },
+        "adminOnly": { "type": "boolean" },
+        "allowsPrepopulate": { "type": "boolean" },
+        "noDuplicates": { "type": "boolean" },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "value": { "type": "string" },
+              "isSelected": { "type": "boolean" },
+              "price": { "type": ["number", "null"] }
+            }
+          }
+        },
+        "defaultValue": { "type": ["string", "number", "boolean", "null"] },
+        "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "validation": {
+              "type": "object",
+              "properties": {
+                "pattern": { "type": "string" },
+                "min": { "type": ["number", "null"] },
+                "max": { "type": ["number", "null"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ConditionalLogic": {
+      "type": "object",
+      "required": ["action", "match"],
+      "properties": {
+        "action": { "enum": ["show", "hide", "disable", "readonly", "toggle_required"] },
+        "match": { "enum": ["all", "any"] },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "operator", "value"],
+            "properties": {
+              "source": {
+                "type": "object",
+                "required": ["fieldId"],
+                "properties": {
+                  "fieldId": { "type": "integer" }
+                }
+              },
+              "operator": {
+                "enum": ["is", "isnot", "<", ">", "<=", ">=", "contains", "starts_with", "ends_with"]
+              },
+              "value": { "type": ["string", "number", "boolean"] }
+            }
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ConditionalLogic" }
+        }
+      }
+    },
+    "Notification": {
+      "type": "object",
+      "required": ["id", "to", "subject"],
+      "properties": {
+        "id": { "type": "string" },
+        "to": { "type": "string" },
+        "fromName": { "type": "string" },
+        "fromEmail": { "type": "string" },
+        "replyTo": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "format": { "enum": ["html", "text"] },
+        "attachUploads": { "type": "boolean" },
+        "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" }
+      }
+    },
+    "Confirmation": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "enum": ["message", "page", "redirect"] },
+        "message": { "type": "string" },
+        "pageId": { "type": ["integer", "null"] },
+        "redirectUrl": { "type": "string" },
+        "queryString": { "type": "string" },
+        "conditionalLogic": { "$ref": "#/definitions/ConditionalLogic" }
+      }
+    }
+  }
+}
