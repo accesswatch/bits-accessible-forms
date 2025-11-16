@@ -2,6 +2,7 @@
   "name": "accesswatch/bits-accessible-forms",
   "description": "WCAG 2.2 AA accessible form builder for WordPress.",
   "type": "wordpress-plugin",
+  "license": "proprietary",
   "require": {},
   "require-dev": {
     "phpunit/phpunit": "^10.0"
