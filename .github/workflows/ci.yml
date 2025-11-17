@@ -32,13 +32,34 @@ jobs:
           php-version: '8.1'
           tools: composer:v2
           coverage: none
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
-          path: vendor
+          path: |
+            ${{ steps.composer-cache.outputs.dir }}
+            vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+      - name: Verify composer files
+        run: |
+          echo "Checking for composer.json..."
+          if [ ! -f composer.json ]; then
+            echo "ERROR: composer.json file not found!"
+            exit 1
+          fi
+          echo "composer.json found"
+          
+          echo "Checking for composer.lock..."
+          if [ ! -f composer.lock ]; then
+            echo "WARNING: composer.lock file not found! Creating from composer.json..."
+            composer update --no-interaction --prefer-dist --no-progress
+          else
+            echo "composer.lock found"
+          fi
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
       - name: Install dependencies
